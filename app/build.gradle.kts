@@ -54,6 +54,7 @@ dependencies {
 
     implementation(libs.google.gson)
     implementation(libs.coil)
+    implementation(libs.material)
 
     testImplementation(libs.junit)
 
