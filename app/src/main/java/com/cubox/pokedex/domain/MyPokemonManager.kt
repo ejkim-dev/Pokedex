@@ -9,8 +9,8 @@ object MyPokemonManager {
         return myPokemonHistoryList
     }
 
-    fun getMyPokemonHistoryById(id: Int): MyPokemonHistory? {
-        return myPokemonHistoryList.find { it.id == id }
+    fun getMyPokemonHistoryById(pokemonId: Int): MyPokemonHistory? {
+        return myPokemonHistoryList.find { it.id == pokemonId }
     }
 
     fun addMyPokemonHistory(pokemonId: Int) {
@@ -34,12 +34,8 @@ object MyPokemonManager {
         }
     }
 
-    fun deleteMyPokemonHistory(myPokemonHistory: MyPokemonHistory) {
-        myPokemonHistoryList.remove(myPokemonHistory)
-    }
-
-    fun deleteMyPokemonHistoryById(id: Int) {
-        val myPokemonHistory = myPokemonHistoryList.find { it.id == id }
+    fun deleteMyPokemonHistoryById(pokemonId: Int) {
+        val myPokemonHistory = myPokemonHistoryList.find { it.id == pokemonId }
         myPokemonHistory?.let {
             myPokemonHistoryList.remove(it)
         }

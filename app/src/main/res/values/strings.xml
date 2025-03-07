@@ -2,4 +2,7 @@
     <string name="app_name">Pokedex</string>
     <string name="pokemon_list_title">Pokemon List</string>
     <string name="my_pokemon_title">My Pokemon</string>
+    <string name="content_description_pokemon_image">pokemon image</string>
+    <string name="saved_time">Saved Time</string>
+    <string name="last_updated_time">Last Updated Time</string>
 </resources>

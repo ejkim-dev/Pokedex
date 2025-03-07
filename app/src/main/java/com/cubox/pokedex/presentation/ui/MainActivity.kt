@@ -7,17 +7,16 @@ import com.google.android.material.tabs.TabLayoutMediator
 
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate) {
 
-
     override fun initViews() {
         super.initViews()
         setLayoutMargin()
+        binding.viewPagerMain.adapter = MainPagerAdapter(this@MainActivity)
     }
 
     override fun subscribeView() {
         super.subscribeView()
 
         with(binding) {
-            viewPagerMain.adapter = MainPagerAdapter(this@MainActivity)
             TabLayoutMediator(tabLayoutMain, viewPagerMain) { tab, position ->
                 tab.text = when (position) {
                     1 -> getString(R.string.pokemon_list_title)
