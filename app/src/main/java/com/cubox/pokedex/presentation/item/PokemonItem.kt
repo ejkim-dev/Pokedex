@@ -17,5 +17,6 @@ data class MyPokemonItem(
     override val name: String,
     override val imageUrl: String,
     val savedTime: String,
-    val updatedTime: String
+    val updatedTime: String,
+    val lastClickedTime: Long
 ): BasePokemonItem
