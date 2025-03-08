@@ -44,11 +44,12 @@ class PokemonAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val currentItem = getItem(position)
         holder.itemView.setOnClickListener {
-            onItemClick(getItem(position))
+            onItemClick(currentItem)
         }
 
-        when (val currentItem = getItem(position)) {
+        when (currentItem) {
             is PokemonItem -> holder.bind(currentItem)
             is MyPokemonItem -> holder.bindMyPokemon(currentItem)
         }

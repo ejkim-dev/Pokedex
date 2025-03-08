@@ -1,9 +1,10 @@
 package com.cubox.pokedex.presentation.ui
 
-import android.util.Log
+import android.content.Intent
 import com.cubox.pokedex.databinding.FragmentPokemonListBinding
 import com.cubox.pokedex.domain.MyPokemonManager
 import com.cubox.pokedex.domain.TimeUtil
+import com.cubox.pokedex.presentation.KeyConstant
 import com.cubox.pokedex.presentation.adapter.PokemonAdapter
 import com.cubox.pokedex.presentation.item.MyPokemonItem
 import com.cubox.pokedex.presentation.showToast
@@ -17,8 +18,13 @@ class MyPokemonFragment :
         super.initViews()
 
         binding.recyclerViewPokemonList.adapter = PokemonAdapter { pokemon ->
-            // Do something with the selected pokemon
-            Log.d("######", "initViews: $pokemon")
+            MyPokemonManager.addMyPokemonHistory(pokemon.id)
+
+            val intent = Intent(requireContext(), DetailActivity::class.java)
+            intent.putExtra(KeyConstant.POKEMON_ID, pokemon.id)
+            intent.putExtra(KeyConstant.POKEMON_NAME, pokemon.name)
+            intent.putExtra(KeyConstant.IMAGE, pokemon.imageUrl)
+            startActivity(intent)
         }
     }
 

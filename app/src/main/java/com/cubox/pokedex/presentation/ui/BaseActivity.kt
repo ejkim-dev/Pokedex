@@ -11,8 +11,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.viewbinding.ViewBinding
+import com.cubox.pokedex.presentation.showToast
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.subjects.PublishSubject
 
 abstract class BaseActivity<VB : ViewBinding>(
@@ -43,7 +46,17 @@ abstract class BaseActivity<VB : ViewBinding>(
         disposables.clear()
     }
 
-    open fun initViews() {}
+    open fun initViews() {
+        error
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe ({
+                showToast("error: $it")
+            }) {
+                processError(it)
+            }
+            .addTo(disposables)
+    }
+
     open fun subscribeView() {}
 
     open fun setLayoutMargin() {
@@ -64,5 +77,9 @@ abstract class BaseActivity<VB : ViewBinding>(
 
     protected fun processError(throwable: Throwable) {
         _error.onNext(throwable.message ?: "An error occurred")
+    }
+
+    protected fun processError(message: String) {
+        _error.onNext(message)
     }
 }

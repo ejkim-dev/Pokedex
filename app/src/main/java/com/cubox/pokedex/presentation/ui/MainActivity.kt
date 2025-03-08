@@ -6,9 +6,7 @@ import com.cubox.pokedex.domain.MyPokemonManager
 import com.cubox.pokedex.domain.model.PokemonInfo
 import com.cubox.pokedex.domain.usecase.PokemonUseCase
 import com.cubox.pokedex.presentation.adapter.MainPagerAdapter
-import com.cubox.pokedex.presentation.showToast
 import com.google.android.material.tabs.TabLayoutMediator
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -19,6 +17,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         PokemonUseCase()
     }
     private val pokemonSubject = BehaviorSubject.create<List<PokemonInfo>>()
+    private var _isLoading = false
+    val isLoading: Boolean
+        get() = _isLoading
+
 
     override fun initViews() {
         super.initViews()
@@ -27,15 +29,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         MyPokemonManager.clearMyPokemonHistory()
 
         binding.viewPagerMain.adapter = MainPagerAdapter(this@MainActivity)
-
-        error
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe ({
-                showToast("error: $it")
-            }) {
-                processError(it)
-            }
-            .addTo(disposables)
     }
 
     override fun subscribeView() {
@@ -56,11 +49,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         }
     }
 
-    fun getPokemon(limit: Int = 50, offset: Int) {
+    fun getPokemon(limit: Int = 10, offset: Int) {
         pokemonUseCase(limit, offset)
             .subscribeOn(Schedulers.io())
+            .doOnSubscribe { _isLoading = true }
+            .doOnTerminate { _isLoading = false }
             .subscribe({
-                pokemonSubject.onNext(it)
+                if (pokemonSubject.value == null) {
+                    pokemonSubject.onNext(it)
+                } else {
+                    val currentList = pokemonSubject.value ?: emptyList()
+                    pokemonSubject.onNext(currentList + it)
+                }
             }, {
                 processError(it)
             })

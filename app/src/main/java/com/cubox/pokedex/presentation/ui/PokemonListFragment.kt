@@ -1,9 +1,10 @@
 package com.cubox.pokedex.presentation.ui
 
-import android.util.Log
+import android.content.Intent
 import androidx.recyclerview.widget.GridLayoutManager
 import com.cubox.pokedex.databinding.FragmentPokemonListBinding
 import com.cubox.pokedex.domain.MyPokemonManager
+import com.cubox.pokedex.presentation.KeyConstant
 import com.cubox.pokedex.presentation.adapter.PokemonAdapter
 import com.cubox.pokedex.presentation.item.PokemonItem
 import com.cubox.pokedex.presentation.showToast
@@ -19,6 +20,13 @@ class PokemonListFragment :
 
         binding.recyclerViewPokemonList.adapter = PokemonAdapter { pokemon ->
             MyPokemonManager.addMyPokemonHistory(pokemon.id)
+
+            val intent = Intent(requireContext(), DetailActivity::class.java)
+            intent.putExtra(KeyConstant.POKEMON_ID, pokemon.id)
+            intent.putExtra(KeyConstant.POKEMON_NAME, pokemon.name)
+            intent.putExtra(KeyConstant.IMAGE, pokemon.imageUrl)
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            startActivity(intent)
         }
     }
 
@@ -33,8 +41,11 @@ class PokemonListFragment :
                     val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
                     val totalItemCount = layoutManager.itemCount
 
-                    if (lastVisibleItemPosition >= totalItemCount - 1) {
-                        Log.d("######", "subscribeView: ${event.view.scrollY} | $totalItemCount")
+
+                    (activity as? MainActivity)?.run {
+                        if (lastVisibleItemPosition >= totalItemCount - 1 && !isLoading) {
+                            getPokemon(offset = totalItemCount)
+                        }
                     }
                 }
                 .addTo(disposables)
@@ -50,6 +61,7 @@ class PokemonListFragment :
                 .subscribe({ pokemonList ->
                     val pokemonItemList =
                         pokemonList.map { PokemonItem(it.id, it.name, it.imageUrl) }
+
                     (binding.recyclerViewPokemonList.adapter as? PokemonAdapter)?.submitList(
                         pokemonItemList
                     )
