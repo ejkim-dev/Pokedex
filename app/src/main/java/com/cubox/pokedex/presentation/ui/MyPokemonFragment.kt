@@ -17,8 +17,4 @@ class MyPokemonFragment :
             submitList(dummyPokemonList)
         }
     }
-
-    override fun subscribeView() {
-
-    }
 }

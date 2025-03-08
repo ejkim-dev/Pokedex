@@ -9,6 +9,7 @@ import com.cubox.pokedex.presentation.hide
 import com.cubox.pokedex.presentation.item.BasePokemonItem
 import com.cubox.pokedex.presentation.item.MyPokemonItem
 import com.cubox.pokedex.presentation.item.PokemonItem
+import com.cubox.pokedex.presentation.setImageUrl
 
 class PokemonAdapter(
     private val onItemClick: (BasePokemonItem) -> Unit
@@ -19,6 +20,7 @@ class PokemonAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: BasePokemonItem) = with(binding) {
             textViewPokemonName.text = item.name
+            imageViewPokemon.setImageUrl(item.imageUrl)
 
             textViewSavedTime.hide()
             textViewUpdatedTime.hide()
@@ -28,6 +30,7 @@ class PokemonAdapter(
 
         fun bindMyPokemon(item: BasePokemonItem) = with(binding) {
             textViewPokemonName.text = item.name
+            imageViewPokemon.setImageUrl(item.imageUrl)
 
             textViewSavedTime.text = (item as MyPokemonItem).savedTime
             textViewUpdatedTime.text = item.updatedTime

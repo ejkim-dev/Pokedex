@@ -11,6 +11,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.viewbinding.ViewBinding
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.subjects.PublishSubject
 
 abstract class BaseActivity<VB : ViewBinding>(
     private val bindingFactory: (LayoutInflater) -> VB
@@ -20,6 +23,12 @@ abstract class BaseActivity<VB : ViewBinding>(
         bindingFactory(layoutInflater)
     }
 
+    protected val disposables = CompositeDisposable()
+
+    private val _error: PublishSubject<String> = PublishSubject.create()
+    val error : Observable<String>
+        get() = _error.hide()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -27,6 +36,11 @@ abstract class BaseActivity<VB : ViewBinding>(
 
         initViews()
         subscribeView()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposables.clear()
     }
 
     open fun initViews() {}
@@ -47,4 +61,8 @@ abstract class BaseActivity<VB : ViewBinding>(
     }
 
     protected fun getDrawableId(resId: Int): Drawable? = ContextCompat.getDrawable(this, resId)
+
+    protected fun processError(throwable: Throwable) {
+        _error.onNext(throwable.message ?: "An error occurred")
+    }
 }

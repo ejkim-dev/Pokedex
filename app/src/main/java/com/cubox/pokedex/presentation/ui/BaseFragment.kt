@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 abstract class BaseFragment<VB : ViewBinding>(
     private val bindingFactory: (LayoutInflater, ViewGroup?, Boolean) -> VB
@@ -13,6 +14,8 @@ abstract class BaseFragment<VB : ViewBinding>(
 
     private var _binding: VB? = null
     protected val binding get() = _binding!!
+
+    protected val disposables = CompositeDisposable()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,6 +29,7 @@ abstract class BaseFragment<VB : ViewBinding>(
         super.onViewCreated(view, savedInstanceState)
 
         initViews()
+        subscribeData()
         subscribeView()
     }
 
@@ -34,6 +38,12 @@ abstract class BaseFragment<VB : ViewBinding>(
         _binding = null
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        disposables.clear()
+    }
+
     open fun initViews() { }
+    open fun subscribeData() { }
     open fun subscribeView() { }
 }

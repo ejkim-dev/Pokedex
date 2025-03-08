@@ -7,6 +7,5 @@ data class PokemonInfo(
     val height: Double, //mm
     val weight: Double, //g
     val baseExperience: Int,
-    val imageUrl: String,
-    val speciesUrl: String
+    val imageUrl: String
 )

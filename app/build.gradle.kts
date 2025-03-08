@@ -50,11 +50,20 @@ dependencies {
     implementation(libs.retrofit.moshi)
     implementation(libs.okhttp.core)
     implementation(libs.okhttp.logging)
+    implementation(libs.retrofit.adapter)
     implementation(libs.androidx.coroutines)
+
+    implementation(libs.moshi.kotlin)
 
     implementation(libs.google.gson)
     implementation(libs.coil)
     implementation(libs.material)
+
+    // rx
+    implementation(libs.reactivex.rxjava)
+    implementation(libs.reactivex.rxkotlin)
+    implementation(libs.reactivex.rxandroid)
+    implementation(libs.reactivex.rxbinding)
 
     testImplementation(libs.junit)
 

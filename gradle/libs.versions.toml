@@ -15,6 +15,12 @@ coroutines = "1.7.3"
 gson = "2.10.1"
 coils = "1.3.2"
 materialVersion = "1.12.0"
+rxJava = "3.1.5"
+rxAndroid = "3.0.2"
+rxKotlin = "3.0.1"
+rxBinding = "4.0.0"
+adapterRxJava3 = "2.11.0"
+moshi = "1.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,10 +36,16 @@ okhttp-core = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
+moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
 androidx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 google-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coils" }
 material = { group = "com.google.android.material", name = "material", version.ref = "materialVersion" }
+reactivex-rxjava = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxJava" }
+reactivex-rxandroid = { group = "io.reactivex.rxjava3", name = "rxandroid", version.ref = "rxAndroid" }
+reactivex-rxkotlin = { group = "io.reactivex.rxjava3", name = "rxkotlin", version.ref = "rxKotlin" }
+reactivex-rxbinding = { group = "com.jakewharton.rxbinding4", name = "rxbinding", version.ref = "rxBinding" }
+retrofit-adapter = { group = "com.squareup.retrofit2", name = "adapter-rxjava3", version.ref = "adapterRxJava3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

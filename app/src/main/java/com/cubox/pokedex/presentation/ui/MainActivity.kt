@@ -2,15 +2,38 @@ package com.cubox.pokedex.presentation.ui
 
 import com.cubox.pokedex.R
 import com.cubox.pokedex.databinding.ActivityMainBinding
+import com.cubox.pokedex.domain.model.PokemonInfo
+import com.cubox.pokedex.domain.usecase.PokemonUseCase
 import com.cubox.pokedex.presentation.adapter.MainPagerAdapter
+import com.cubox.pokedex.presentation.showToast
 import com.google.android.material.tabs.TabLayoutMediator
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate) {
+    private val pokemonUseCase: PokemonUseCase by lazy {
+        PokemonUseCase()
+    }
+    private val pokemonSubject = BehaviorSubject.create<List<PokemonInfo>>()
 
     override fun initViews() {
         super.initViews()
         setLayoutMargin()
+        getPokemon(100, 0)
+
         binding.viewPagerMain.adapter = MainPagerAdapter(this@MainActivity)
+
+        error
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe ({
+                showToast("error: $it")
+            }) {
+                processError(it)
+            }
+            .addTo(disposables)
     }
 
     override fun subscribeView() {
@@ -29,5 +52,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 }
             }.attach()
         }
+    }
+
+    fun getPokemon(limit: Int, offset: Int) {
+        pokemonUseCase(limit, offset)
+            .subscribeOn(Schedulers.io())
+            .subscribe({
+                pokemonSubject.onNext(it)
+            }, {
+                processError(it)
+            })
+            .addTo(disposables)
+    }
+
+    fun observePokemon(): Observable<List<PokemonInfo>> {
+        return pokemonSubject.hide()
     }
 }
