@@ -1,4 +1,4 @@
-package com.cubox.pokedex.domain
+package com.cubox.pokedex.presentation
 
 import java.text.SimpleDateFormat
 import java.util.Date

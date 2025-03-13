@@ -3,7 +3,7 @@ package com.cubox.pokedex.presentation.ui
 import android.content.Intent
 import com.cubox.pokedex.databinding.FragmentPokemonListBinding
 import com.cubox.pokedex.domain.MyPokemonManager
-import com.cubox.pokedex.domain.TimeUtil
+import com.cubox.pokedex.presentation.TimeUtil
 import com.cubox.pokedex.presentation.KeyConstant
 import com.cubox.pokedex.presentation.adapter.PokemonAdapter
 import com.cubox.pokedex.presentation.item.MyPokemonItem

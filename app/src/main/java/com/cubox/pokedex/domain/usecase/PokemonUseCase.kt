@@ -28,7 +28,7 @@ class PokemonUseCase(
                                 height = response.height,
                                 weight = response.weight,
                                 baseExperience = response.baseExperience,
-                                imageUrl = response.getImageUrl()
+                                imageUrl = response.imageUrl
                             )
                         }
                 }

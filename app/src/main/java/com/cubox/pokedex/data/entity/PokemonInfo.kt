@@ -13,10 +13,8 @@ data class PokemonInfoResponse(
     @Json(name = "base_experience")
     val baseExperience: Int
 ) {
-    fun getImageUrl(): String {
-        return "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png"
-    }
-
+    val imageUrl =
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png"
 }
 
 data class TypeEntity(
