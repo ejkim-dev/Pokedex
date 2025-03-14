@@ -1,6 +1,7 @@
 package com.cubox.pokedex.presentation.ui
 
 import com.cubox.pokedex.R
+import com.cubox.pokedex.data.PokemonRepository
 import com.cubox.pokedex.databinding.ActivityMainBinding
 import com.cubox.pokedex.domain.model.PokemonInfo
 import com.cubox.pokedex.domain.usecase.PokemonUseCase
@@ -13,7 +14,7 @@ import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate) {
     private val pokemonUseCase: PokemonUseCase by lazy {
-        PokemonUseCase()
+        PokemonUseCase(PokemonRepository())
     }
     private val pokemonSubject = BehaviorSubject.create<List<PokemonInfo>>()
     private var _isLoading = false
@@ -49,6 +50,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
     fun getPokemon(limit: Int = 10, offset: Int) {
         pokemonUseCase(limit, offset)
+            .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { _isLoading = true }
             .doOnTerminate { _isLoading = false }

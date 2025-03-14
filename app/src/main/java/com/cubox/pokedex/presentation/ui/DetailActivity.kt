@@ -1,16 +1,18 @@
 package com.cubox.pokedex.presentation.ui
 
+import com.cubox.pokedex.data.PokemonRepository
 import com.cubox.pokedex.databinding.ActivityDetailBinding
 import com.cubox.pokedex.domain.usecase.PokemonSpeciesUseCase
 import com.cubox.pokedex.presentation.KeyConstant
 import com.cubox.pokedex.presentation.setImageUrl
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class DetailActivity : BaseActivity<ActivityDetailBinding>(ActivityDetailBinding::inflate) {
 
     private val pokemonSpeciesUseCase: PokemonSpeciesUseCase by lazy {
-        PokemonSpeciesUseCase()
+        PokemonSpeciesUseCase(PokemonRepository())
     }
 
     override fun initViews() {
@@ -29,6 +31,7 @@ class DetailActivity : BaseActivity<ActivityDetailBinding>(ActivityDetailBinding
         } else {
             pokemonSpeciesUseCase(id)
                 .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
                 .subscribe({ pokemonSpecies ->
                     binding.imageViewPokemon.setImageUrl(image)
 
