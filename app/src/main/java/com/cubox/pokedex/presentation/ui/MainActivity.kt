@@ -2,7 +2,6 @@ package com.cubox.pokedex.presentation.ui
 
 import com.cubox.pokedex.R
 import com.cubox.pokedex.databinding.ActivityMainBinding
-import com.cubox.pokedex.domain.MyPokemonManager
 import com.cubox.pokedex.domain.model.PokemonInfo
 import com.cubox.pokedex.domain.usecase.PokemonUseCase
 import com.cubox.pokedex.presentation.adapter.MainPagerAdapter
@@ -26,7 +25,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         super.initViews()
         setLayoutMargin()
         getPokemon(offset = 0)
-        MyPokemonManager.clearMyPokemonHistory()
 
         binding.viewPagerMain.adapter = MainPagerAdapter(this@MainActivity)
     }

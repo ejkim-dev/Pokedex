@@ -2,8 +2,9 @@ package com.cubox.pokedex.presentation.ui
 
 import android.content.Intent
 import androidx.recyclerview.widget.GridLayoutManager
+import com.cubox.pokedex.data.PokemonRepository
 import com.cubox.pokedex.databinding.FragmentPokemonListBinding
-import com.cubox.pokedex.domain.MyPokemonManager
+import com.cubox.pokedex.domain.usecase.AddPokemonHistoryUseCase
 import com.cubox.pokedex.presentation.KeyConstant
 import com.cubox.pokedex.presentation.adapter.PokemonAdapter
 import com.cubox.pokedex.presentation.item.PokemonItem
@@ -15,11 +16,15 @@ import io.reactivex.rxjava3.kotlin.addTo
 class PokemonListFragment :
     BaseFragment<FragmentPokemonListBinding>(FragmentPokemonListBinding::inflate) {
 
+        private val addPokemonHistoryUseCase: AddPokemonHistoryUseCase by lazy {
+            AddPokemonHistoryUseCase(PokemonRepository())
+        }
+
     override fun initViews() {
         super.initViews()
 
         binding.recyclerViewPokemonList.adapter = PokemonAdapter { pokemon ->
-            MyPokemonManager.addMyPokemonHistory(pokemon.id)
+            addPokemonHistoryUseCase(pokemon.id)
 
             val intent = Intent(requireContext(), DetailActivity::class.java)
             intent.putExtra(KeyConstant.POKEMON_ID, pokemon.id)
@@ -36,7 +41,7 @@ class PokemonListFragment :
         with(binding) {
             recyclerViewPokemonList.scrollChangeEvents()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { event ->
+                .subscribe {
                     val layoutManager = recyclerViewPokemonList.layoutManager as GridLayoutManager
                     val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
                     val totalItemCount = layoutManager.itemCount
