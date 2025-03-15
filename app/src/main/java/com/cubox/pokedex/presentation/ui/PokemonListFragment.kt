@@ -2,7 +2,7 @@ package com.cubox.pokedex.presentation.ui
 
 import android.content.Intent
 import androidx.recyclerview.widget.GridLayoutManager
-import com.cubox.pokedex.data.PokemonRepository
+import com.cubox.pokedex.data.repository.PokemonRepository
 import com.cubox.pokedex.databinding.FragmentPokemonListBinding
 import com.cubox.pokedex.domain.usecase.AddPokemonHistoryUseCase
 import com.cubox.pokedex.presentation.KeyConstant

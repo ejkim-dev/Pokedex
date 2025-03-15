@@ -1,4 +1,4 @@
-package com.cubox.pokedex.domain.model
+package com.cubox.pokedex.data.memory.model
 
 data class MyPokemonHistory(
     val id: Int,

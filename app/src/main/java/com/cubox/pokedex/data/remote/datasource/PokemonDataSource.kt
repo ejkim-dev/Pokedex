@@ -1,12 +1,14 @@
-package com.cubox.pokedex.data
+package com.cubox.pokedex.data.remote.datasource
 
-import com.cubox.pokedex.data.entity.*
+import com.cubox.pokedex.data.remote.model.PokemonInfoResponse
+import com.cubox.pokedex.data.remote.model.PokemonResponse
+import com.cubox.pokedex.data.remote.model.PokemonSpeciesResponse
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface PokemonApiService {
+interface PokemonDataSource {
     @GET("pokemon")
     fun getPokemonList(
         @Query("limit") limit: Int,

@@ -1,4 +1,4 @@
-package com.cubox.pokedex.data.entity
+package com.cubox.pokedex.data.remote.model
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -7,7 +7,7 @@ import com.squareup.moshi.JsonClass
 data class PokemonInfoResponse(
     val id: Int,
     val name: String,
-    val types: List<TypeEntity>,
+    val types: List<TypeResponse>,
     val height: Double,
     val weight: Double,
     @Json(name = "base_experience")
@@ -17,7 +17,7 @@ data class PokemonInfoResponse(
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png"
 }
 
-data class TypeEntity(
+data class TypeResponse(
     val slot: Int,
     val type: Map<String, String>
 )

@@ -1,12 +1,11 @@
 package com.cubox.pokedex.presentation.ui
 
 import android.content.Intent
-import com.cubox.pokedex.data.PokemonRepository
+import com.cubox.pokedex.data.repository.PokemonRepository
 import com.cubox.pokedex.databinding.FragmentPokemonListBinding
-import com.cubox.pokedex.domain.model.MyPokemonHistory
-import com.cubox.pokedex.domain.model.PokemonInfo
+import com.cubox.pokedex.domain.entity.MyPokemon
 import com.cubox.pokedex.domain.usecase.AddPokemonHistoryUseCase
-import com.cubox.pokedex.domain.usecase.GetPokemonHistoryUseCase
+import com.cubox.pokedex.domain.usecase.MyPokemonUseCase
 import com.cubox.pokedex.presentation.TimeUtil
 import com.cubox.pokedex.presentation.KeyConstant
 import com.cubox.pokedex.presentation.adapter.PokemonAdapter
@@ -23,8 +22,8 @@ class MyPokemonFragment :
         AddPokemonHistoryUseCase(PokemonRepository())
     }
 
-    private val getPokemonHistoryUseCase: GetPokemonHistoryUseCase by lazy {
-        GetPokemonHistoryUseCase(PokemonRepository())
+    private val myPokemonUseCase: MyPokemonUseCase by lazy {
+        MyPokemonUseCase(PokemonRepository())
     }
 
     override fun initViews() {
@@ -48,11 +47,11 @@ class MyPokemonFragment :
             observePokemon()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map { createMyPokemonItems(it, getPokemonHistoryUseCase()) }
+                .map { myPokemonUseCase(it) }
                 .filter { it.isNotEmpty() }
                 .subscribe({
                     with(binding.recyclerViewPokemonList) {
-                        (adapter as? PokemonAdapter)?.submitList(it)
+                        (adapter as? PokemonAdapter)?.submitList(createMyPokemonItems(it))
                         smoothScrollToPosition(0)
                     }
                 }) {
@@ -63,24 +62,17 @@ class MyPokemonFragment :
     }
 
     private fun createMyPokemonItems(
-        pokemonList: List<PokemonInfo>,
-        historyList: List<MyPokemonHistory>
+        myPokemonList: List<MyPokemon>
     ): List<MyPokemonItem> {
-        if (historyList.isEmpty() || pokemonList.isEmpty()) return emptyList()
-
-        val pokemonMap = pokemonList.associateBy { it.id }
-
-        return historyList.mapNotNull { history ->
-            pokemonMap[history.id]?.let { pokemon ->
-                MyPokemonItem(
-                    id = history.id,
-                    name = pokemon.name,
-                    imageUrl = pokemon.imageUrl,
-                    savedTime = TimeUtil.formatTime(history.createTimeMillis),
-                    updatedTime = TimeUtil.formatTime(history.updatedTimeMillis),
-                    lastClickedTime = history.updatedTimeMillis
-                )
-            }
+        return myPokemonList.map { myPokemon ->
+            MyPokemonItem(
+                id = myPokemon.id,
+                name = myPokemon.name,
+                imageUrl = myPokemon.imageUrl,
+                savedTime = TimeUtil.formatTime(myPokemon.savedTime),
+                updatedTime = TimeUtil.formatTime(myPokemon.updatedTime),
+                lastClickedTime = myPokemon.updatedTime
+            )
         }.sortedByDescending { it.lastClickedTime }
     }
 }

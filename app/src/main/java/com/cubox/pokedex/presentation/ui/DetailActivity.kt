@@ -1,6 +1,6 @@
 package com.cubox.pokedex.presentation.ui
 
-import com.cubox.pokedex.data.PokemonRepository
+import com.cubox.pokedex.data.repository.PokemonRepository
 import com.cubox.pokedex.databinding.ActivityDetailBinding
 import com.cubox.pokedex.domain.usecase.PokemonSpeciesUseCase
 import com.cubox.pokedex.presentation.KeyConstant

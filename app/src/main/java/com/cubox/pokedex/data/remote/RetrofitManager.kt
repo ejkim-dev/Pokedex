@@ -1,6 +1,7 @@
-package com.cubox.pokedex.data
+package com.cubox.pokedex.data.remote
 
-import com.cubox.pokedex.data.PokemonApiService.Companion.BASE_URL
+import com.cubox.pokedex.data.remote.datasource.PokemonDataSource
+import com.cubox.pokedex.data.remote.datasource.PokemonDataSource.Companion.BASE_URL
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
@@ -36,7 +37,7 @@ object RetrofitManager {
             .build()
     }
 
-    fun getPokemonService(): PokemonApiService {
-        return retrofit.create(PokemonApiService::class.java)
+    fun pokemonDataSource(): PokemonDataSource {
+        return retrofit.create(PokemonDataSource::class.java)
     }
 }

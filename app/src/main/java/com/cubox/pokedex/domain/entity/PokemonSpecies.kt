@@ -1,4 +1,4 @@
-package com.cubox.pokedex.domain.model
+package com.cubox.pokedex.domain.entity
 
 data class PokemonSpecies(
     val id: Int,
