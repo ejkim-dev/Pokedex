@@ -1,6 +1,8 @@
 package com.pokemon.pokedex.data.repository
 
-import com.pokemon.pokedex.data.memory.datasource.InMemoryDataSource
+import com.pokemon.pokedex.data.KeyConstants
+import com.pokemon.pokedex.data.memory.datasource.InMemoryDataSource.loadData
+import com.pokemon.pokedex.data.memory.datasource.InMemoryDataSource.saveData
 import com.pokemon.pokedex.data.remote.datasource.PokemonDataSource
 import com.pokemon.pokedex.data.remote.RetrofitManager
 import com.pokemon.pokedex.data.remote.model.PokemonInfoResponse
@@ -15,6 +17,10 @@ class PokemonRepository {
         get() = RetrofitManager.pokemonDataSource()
 
     fun getPokemonList(limit: Int, offset: Int): Single<List<PokemonInfo>> {
+        if (getPokemonInfoList().isNotEmpty() && offset == 0) {
+            return Single.just(getPokemonInfoList())
+        }
+
         return pokemonDataSource.getPokemonList(limit, offset)
             .map { it.results.map { extractIdFromUrl(it.url) } }
             .flatMap { pokemonIds ->
@@ -58,12 +64,13 @@ class PokemonRepository {
             }
     }
 
-    fun getMyPokemonList(pokemonList: List<PokemonInfo>): List<MyPokemon> {
-        if (getMyPokemonHistoryList().isEmpty() || pokemonList.isEmpty()) return emptyList()
+    fun getMyPokemonList(): Single<List<MyPokemon>> {
+        val pokemonList = getPokemonInfoList()
+        if (getMyPokemonHistoryList().isEmpty() || pokemonList.isEmpty()) return Single.just(emptyList())
 
         val pokemonMap = pokemonList.associateBy { it.id }
 
-        return getMyPokemonHistoryList().mapNotNull { history ->
+        val myPokemonList = getMyPokemonHistoryList().mapNotNull { history ->
             pokemonMap[history.id]?.let { pokemon ->
                 MyPokemon(
                     id = history.id,
@@ -74,14 +81,50 @@ class PokemonRepository {
                 )
             }
         }
+        return Single.just(myPokemonList)
     }
 
     fun addMyPokemonHistory(pokemonId: Int) {
-        return InMemoryDataSource.addMyPokemonHistory(pokemonId)
+        val myPokemonHistoryList =
+            loadData(KeyConstants.MY_POKEMON, emptyList<MyPokemonHistory>()).toMutableList()
+        val index = myPokemonHistoryList.indexOfFirst { it.id == pokemonId }
+        val isExist = index >= 0
+        val currentTime = System.currentTimeMillis()
+
+        if (isExist) {
+            val currentMyPokemonHistory = myPokemonHistoryList[index]
+            // 같은 ID가 이미 있으면 updatedTimeMillis만 갱신
+            myPokemonHistoryList[index] =
+                currentMyPokemonHistory.copy(updatedTimeMillis = currentTime)
+        } else {
+            myPokemonHistoryList.add(
+                MyPokemonHistory(
+                    id = pokemonId,
+                    createTimeMillis = currentTime,
+                    updatedTimeMillis = currentTime
+                )
+            )
+        }
+
+        return saveData(KeyConstants.MY_POKEMON, myPokemonHistoryList)
+    }
+
+    fun savePokemonInfoList(pokemonInfo: List<PokemonInfo>) {
+        if (getPokemonInfoList().isEmpty()) {
+            saveData(KeyConstants.POKEMON_INFO, pokemonInfo)
+        } else {
+            val currentPokemonInfoList = getPokemonInfoList().toMutableList()
+            currentPokemonInfoList.addAll(pokemonInfo)
+            saveData(KeyConstants.POKEMON_INFO, currentPokemonInfoList.toList())
+        }
+    }
+
+    fun getPokemonInfoList(): List<PokemonInfo> {
+        return loadData(KeyConstants.POKEMON_INFO, emptyList())
     }
 
     private fun getMyPokemonHistoryList(): List<MyPokemonHistory> {
-        return InMemoryDataSource.getMyPokemonHistoryList()
+        return loadData(KeyConstants.MY_POKEMON, emptyList())
     }
 
     private fun getPokemonInfo(id: Int): Single<PokemonInfo> {

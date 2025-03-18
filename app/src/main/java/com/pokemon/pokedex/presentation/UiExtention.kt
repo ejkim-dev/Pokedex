@@ -4,6 +4,7 @@ import android.app.Activity
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import coil.load
 import com.pokemon.pokedex.R
@@ -18,6 +19,10 @@ fun View.hide() {
 
 fun View.invisible() {
     visibility = View.INVISIBLE
+}
+
+fun Fragment.showToast(message: String) {
+    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
 }
 
 fun FragmentActivity.showToast(message: String) {
