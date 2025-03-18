@@ -18,14 +18,18 @@ class PokemonAdapter(
     class ViewHolder(
         private val binding: ItemPoketmonBinding
     ) : RecyclerView.ViewHolder(binding.root) {
+        init {
+            with(binding) {
+                textViewSavedTime.hide()
+                textViewUpdatedTime.hide()
+                textViewSavedTimeTitle.hide()
+                textViewUpdatedTimeTitle.hide()
+            }
+        }
+
         fun bind(item: BasePokemonItem) = with(binding) {
             textViewPokemonName.text = item.name
             imageViewPokemon.setImageUrl(item.imageUrl)
-
-            textViewSavedTime.hide()
-            textViewUpdatedTime.hide()
-            textViewSavedTimeTitle.hide()
-            textViewUpdatedTimeTitle.hide()
         }
 
         fun bindMyPokemon(item: BasePokemonItem) = with(binding) {

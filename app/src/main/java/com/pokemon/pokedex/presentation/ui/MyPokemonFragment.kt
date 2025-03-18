@@ -9,6 +9,7 @@ import com.pokemon.pokedex.domain.usecase.MyPokemonUseCase
 import com.pokemon.pokedex.presentation.TimeUtil
 import com.pokemon.pokedex.presentation.KeyConstant
 import com.pokemon.pokedex.presentation.adapter.PokemonAdapter
+import com.pokemon.pokedex.presentation.item.BasePokemonItem
 import com.pokemon.pokedex.presentation.item.MyPokemonItem
 import com.pokemon.pokedex.presentation.showToast
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -30,12 +31,7 @@ class MyPokemonFragment :
 
         binding.recyclerViewPokemonList.adapter = PokemonAdapter { pokemon ->
             addPokemonHistoryUseCase(pokemon.id)
-
-            val intent = Intent(requireContext(), DetailActivity::class.java)
-            intent.putExtra(KeyConstant.POKEMON_ID, pokemon.id)
-            intent.putExtra(KeyConstant.POKEMON_NAME, pokemon.name)
-            intent.putExtra(KeyConstant.IMAGE, pokemon.imageUrl)
-            startActivity(intent)
+            showDetailActivity(pokemon)
         }
     }
 
@@ -70,5 +66,13 @@ class MyPokemonFragment :
                 lastClickedTime = myPokemon.updatedTime
             )
         }.sortedByDescending { it.lastClickedTime }
+    }
+
+    private fun showDetailActivity(pokemon: BasePokemonItem) {
+        val intent = Intent(requireContext(), DetailActivity::class.java)
+        intent.putExtra(KeyConstant.POKEMON_ID, pokemon.id)
+        intent.putExtra(KeyConstant.POKEMON_NAME, pokemon.name)
+        intent.putExtra(KeyConstant.IMAGE, pokemon.imageUrl)
+        startActivity(intent)
     }
 }

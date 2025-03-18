@@ -17,6 +17,10 @@ class PokemonRepository {
         get() = RetrofitManager.pokemonDataSource()
 
     fun getPokemonList(limit: Int, offset: Int): Single<List<PokemonInfo>> {
+        if (getPokemonInfoList().isNotEmpty() && offset == 0) {
+            return Single.just(getPokemonInfoList())
+        }
+
         return pokemonDataSource.getPokemonList(limit, offset)
             .map { it.results.map { extractIdFromUrl(it.url) } }
             .flatMap { pokemonIds ->
