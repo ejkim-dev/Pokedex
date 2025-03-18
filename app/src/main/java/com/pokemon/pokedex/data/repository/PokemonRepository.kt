@@ -60,12 +60,13 @@ class PokemonRepository {
             }
     }
 
-    fun getMyPokemonList(pokemonList: List<PokemonInfo>): List<MyPokemon> {
-        if (getMyPokemonHistoryList().isEmpty() || pokemonList.isEmpty()) return emptyList()
+    fun getMyPokemonList(): Single<List<MyPokemon>> {
+        val pokemonList = getPokemonInfoList()
+        if (getMyPokemonHistoryList().isEmpty() || pokemonList.isEmpty()) return Single.just(emptyList())
 
         val pokemonMap = pokemonList.associateBy { it.id }
 
-        return getMyPokemonHistoryList().mapNotNull { history ->
+        val myPokemonList = getMyPokemonHistoryList().mapNotNull { history ->
             pokemonMap[history.id]?.let { pokemon ->
                 MyPokemon(
                     id = history.id,
@@ -76,6 +77,7 @@ class PokemonRepository {
                 )
             }
         }
+        return Single.just(myPokemonList)
     }
 
     fun addMyPokemonHistory(pokemonId: Int) {
@@ -101,6 +103,20 @@ class PokemonRepository {
         }
 
         return saveData(KeyConstants.MY_POKEMON, myPokemonHistoryList)
+    }
+
+    fun savePokemonInfoList(pokemonInfo: List<PokemonInfo>) {
+        if (getPokemonInfoList().isEmpty()) {
+            saveData(KeyConstants.POKEMON_INFO, pokemonInfo)
+        } else {
+            val currentPokemonInfoList = getPokemonInfoList().toMutableList()
+            currentPokemonInfoList.addAll(pokemonInfo)
+            saveData(KeyConstants.POKEMON_INFO, currentPokemonInfoList.toList())
+        }
+    }
+
+    fun getPokemonInfoList(): List<PokemonInfo> {
+        return loadData(KeyConstants.POKEMON_INFO, emptyList())
     }
 
     private fun getMyPokemonHistoryList(): List<MyPokemonHistory> {

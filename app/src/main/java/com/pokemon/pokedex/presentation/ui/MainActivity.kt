@@ -7,14 +7,21 @@ import com.pokemon.pokedex.domain.entity.PokemonInfo
 import com.pokemon.pokedex.domain.usecase.PokemonUseCase
 import com.pokemon.pokedex.presentation.adapter.MainPagerAdapter
 import com.google.android.material.tabs.TabLayoutMediator
+import com.pokemon.pokedex.domain.usecase.PokemonInfoUseCase
+import com.pokemon.pokedex.domain.usecase.SavePokemonInfoUseCase
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate) {
-    private val pokemonUseCase: PokemonUseCase by lazy {
-        PokemonUseCase(PokemonRepository())
+    private val pokemonRepository = PokemonRepository()
+    private val pokemonUseCase: PokemonUseCase by lazy { PokemonUseCase(pokemonRepository) }
+    private val savePokemonInfoUseCase: SavePokemonInfoUseCase by lazy {
+        SavePokemonInfoUseCase(pokemonRepository)
+    }
+    private val pokemonInfoUseCase: PokemonInfoUseCase by lazy {
+        PokemonInfoUseCase(pokemonRepository)
     }
     private val pokemonSubject = BehaviorSubject.create<List<PokemonInfo>>()
     private var _isLoading = false
@@ -54,13 +61,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { _isLoading = true }
             .doOnTerminate { _isLoading = false }
+            .map { savePokemonInfoUseCase(it) }
             .subscribe({
-                if (pokemonSubject.value == null) {
-                    pokemonSubject.onNext(it)
-                } else {
-                    val currentList = pokemonSubject.value ?: emptyList()
-                    pokemonSubject.onNext(currentList + it)
-                }
+                val currentPokemonInfo = pokemonInfoUseCase()
+                pokemonSubject.onNext(currentPokemonInfo)
             }, {
                 processError(it)
             })

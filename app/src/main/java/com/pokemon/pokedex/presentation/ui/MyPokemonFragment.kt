@@ -17,13 +17,12 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 class MyPokemonFragment :
     BaseFragment<FragmentPokemonListBinding>(FragmentPokemonListBinding::inflate) {
-
+    private val pokemonRepository = PokemonRepository()
     private val addPokemonHistoryUseCase: AddPokemonHistoryUseCase by lazy {
-        AddPokemonHistoryUseCase(PokemonRepository())
+        AddPokemonHistoryUseCase(pokemonRepository)
     }
-
     private val myPokemonUseCase: MyPokemonUseCase by lazy {
-        MyPokemonUseCase(PokemonRepository())
+        MyPokemonUseCase(pokemonRepository)
     }
 
     override fun initViews() {
@@ -43,22 +42,19 @@ class MyPokemonFragment :
     override fun onResume() {
         super.onResume()
 
-        (activity as? MainActivity)?.run {
-            observePokemon()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .map { myPokemonUseCase(it) }
-                .filter { it.isNotEmpty() }
-                .subscribe({
-                    with(binding.recyclerViewPokemonList) {
-                        (adapter as? PokemonAdapter)?.submitList(createMyPokemonItems(it))
-                        smoothScrollToPosition(0)
-                    }
-                }) {
-                    showToast("observePokemon error : ${it.message}")
+        myPokemonUseCase()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .filter { it.isNotEmpty() }
+            .subscribe({
+                with(binding.recyclerViewPokemonList) {
+                    (adapter as? PokemonAdapter)?.submitList(createMyPokemonItems(it))
+                    smoothScrollToPosition(0)
                 }
-                .addTo(disposables)
-        }
+            }) {
+                showToast("myPokemonUseCase error : ${it.message}")
+            }
+            .addTo(disposables)
     }
 
     private fun createMyPokemonItems(
