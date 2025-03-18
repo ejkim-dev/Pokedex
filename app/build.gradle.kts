@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.cubox.pokedex"
+    namespace = "com.pokemon.pokedex"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.cubox.pokedex"
+        applicationId = "com.pokemon.pokedex"
         minSdk = 28
         targetSdk = 35
         versionCode = 1
