@@ -10,13 +10,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.pokemon.pokedex.presentation.showToast
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.subjects.PublishSubject
+import kotlinx.coroutines.launch
 
 abstract class BaseActivity<VB : ViewBinding>(
     private val bindingFactory: (LayoutInflater) -> VB
@@ -27,10 +25,6 @@ abstract class BaseActivity<VB : ViewBinding>(
     }
 
     protected val disposables = CompositeDisposable()
-
-    private val _error: PublishSubject<String> = PublishSubject.create()
-    val error : Observable<String>
-        get() = _error.hide()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,14 +41,7 @@ abstract class BaseActivity<VB : ViewBinding>(
     }
 
     open fun initViews() {
-        error
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe ({
-                showToast("error: $it")
-            }) {
-                processError(it)
-            }
-            .addTo(disposables)
+
     }
 
     open fun subscribeView() {}
@@ -75,11 +62,13 @@ abstract class BaseActivity<VB : ViewBinding>(
 
     protected fun getDrawableId(resId: Int): Drawable? = ContextCompat.getDrawable(this, resId)
 
-    protected fun processError(throwable: Throwable) {
-        _error.onNext(throwable.message ?: "An error occurred")
+    protected fun processError(message: String) {
+        lifecycleScope.launch {
+            showToast(message)
+        }
     }
 
-    protected fun processError(message: String) {
-        _error.onNext(message)
+    protected fun processError(throwable: Throwable) {
+        processError(throwable.message ?: "An error occurred")
     }
 }

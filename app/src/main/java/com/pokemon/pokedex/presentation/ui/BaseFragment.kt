@@ -5,8 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
+import com.pokemon.pokedex.presentation.showToast
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import kotlinx.coroutines.launch
 
 abstract class BaseFragment<VB : ViewBinding>(
     private val bindingFactory: (LayoutInflater, ViewGroup?, Boolean) -> VB
@@ -46,4 +49,14 @@ abstract class BaseFragment<VB : ViewBinding>(
     open fun initViews() { }
     open fun subscribeData() { }
     open fun subscribeView() { }
+
+    protected fun processError(message: String) {
+        lifecycleScope.launch {
+            showToast(message)
+        }
+    }
+
+    protected fun processError(throwable: Throwable) {
+        processError(throwable.message ?: "An error occurred")
+    }
 }

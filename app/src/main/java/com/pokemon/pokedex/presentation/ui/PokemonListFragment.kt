@@ -95,16 +95,16 @@ class PokemonListFragment :
 
     private fun getPokemon(limit: Int = 10, offset: Int) {
         pokemonUseCase(limit, offset)
-            .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { loadingObserver.postValue(true) }
             .doOnTerminate { loadingObserver.postValue(false) }
             .map { savePokemonInfoUseCase(it) }
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 val currentPokemonInfo = pokemonInfoUseCase()
                 pokemonSubject.onNext(currentPokemonInfo)
             }, {
-                showToast("getPokemon error : ${it.message}")
+                processError("getPokemon error : ${it.message}")
             })
             .addTo(disposables)
     }
