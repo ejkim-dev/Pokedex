@@ -9,9 +9,7 @@ import com.pokemon.pokedex.domain.usecase.AddPokemonHistoryUseCase
 import com.pokemon.pokedex.presentation.KeyConstant
 import com.pokemon.pokedex.presentation.adapter.PokemonAdapter
 import com.pokemon.pokedex.presentation.item.PokemonItem
-import com.pokemon.pokedex.presentation.showToast
 import com.jakewharton.rxbinding4.view.scrollChangeEvents
-import com.pokemon.pokedex.domain.entity.PokemonInfo
 import com.pokemon.pokedex.domain.usecase.PokemonInfoUseCase
 import com.pokemon.pokedex.domain.usecase.PokemonUseCase
 import com.pokemon.pokedex.domain.usecase.SavePokemonInfoUseCase
@@ -21,7 +19,6 @@ import com.pokemon.pokedex.presentation.show
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.schedulers.Schedulers
-import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 class PokemonListFragment :
     BaseFragment<FragmentPokemonListBinding>(FragmentPokemonListBinding::inflate) {
@@ -36,7 +33,7 @@ class PokemonListFragment :
     private val pokemonInfoUseCase: PokemonInfoUseCase by lazy {
         PokemonInfoUseCase(pokemonRepository)
     }
-    private val pokemonSubject = BehaviorSubject.create<List<PokemonInfo>>()
+
     private val loadingObserver: MutableLiveData<Boolean> = MutableLiveData(false)
 
     override fun initViews() {
@@ -74,20 +71,6 @@ class PokemonListFragment :
     override fun subscribeData() {
         super.subscribeData()
 
-        pokemonSubject
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ pokemonList ->
-                val pokemonItemList =
-                    pokemonList.map { PokemonItem(it.id, it.name, it.imageUrl) }
-
-                (binding.recyclerViewPokemonList.adapter as? PokemonAdapter)?.submitList(
-                    pokemonItemList
-                )
-            }) {
-                showToast("observePokemon error : ${it.message}")
-            }
-            .addTo(disposables)
-
         loadingObserver.observe(viewLifecycleOwner) {
             if (it) binding.progress.show() else binding.progress.hide()
         }
@@ -102,7 +85,13 @@ class PokemonListFragment :
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 val currentPokemonInfo = pokemonInfoUseCase()
-                pokemonSubject.onNext(currentPokemonInfo)
+
+                val pokemonItemList =
+                    currentPokemonInfo.map { PokemonItem(it.id, it.name, it.imageUrl) }
+
+                (binding.recyclerViewPokemonList.adapter as? PokemonAdapter)?.submitList(
+                    pokemonItemList
+                )
             }, {
                 processError("getPokemon error : ${it.message}")
             })
