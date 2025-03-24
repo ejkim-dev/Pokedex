@@ -25,9 +25,7 @@ class MyPokemonFragment :
         MyPokemonUseCase(pokemonRepository)
     }
 
-    override fun initViews() {
-        super.initViews()
-
+    override fun initView() {
         binding.recyclerViewPokemonList.adapter = PokemonAdapter { pokemon ->
             addPokemonHistoryUseCase(pokemon.id)
             showDetailActivity(pokemon)
@@ -37,6 +35,10 @@ class MyPokemonFragment :
     override fun onResume() {
         super.onResume()
 
+        getMyPokemon()
+    }
+
+    private fun getMyPokemon() {
         myPokemonUseCase()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

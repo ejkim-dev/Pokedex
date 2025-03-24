@@ -36,8 +36,8 @@ class PokemonListFragment :
 
     private val loadingObserver: MutableLiveData<Boolean> = MutableLiveData(false)
 
-    override fun initViews() {
-        super.initViews()
+    override fun initView() {
+        subscribeView()
         getPokemon(offset = 0)
 
         binding.recyclerViewPokemonList.adapter = PokemonAdapter { pokemon ->
@@ -46,9 +46,7 @@ class PokemonListFragment :
         }
     }
 
-    override fun subscribeView() {
-        super.subscribeView()
-
+    private fun subscribeView() {
         with(binding) {
             recyclerViewPokemonList.scrollChangeEvents()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -65,14 +63,10 @@ class PokemonListFragment :
                     }
                 }
                 .addTo(disposables)
-        }
-    }
 
-    override fun subscribeData() {
-        super.subscribeData()
-
-        loadingObserver.observe(viewLifecycleOwner) {
-            if (it) binding.progress.show() else binding.progress.hide()
+            loadingObserver.observe(viewLifecycleOwner) {
+                if (it) progress.show() else progress.hide()
+            }
         }
     }
 

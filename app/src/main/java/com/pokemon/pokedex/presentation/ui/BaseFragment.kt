@@ -31,24 +31,16 @@ abstract class BaseFragment<VB : ViewBinding>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initViews()
-        subscribeData()
-        subscribeView()
+        initView()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        disposables.clear()
         _binding = null
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        disposables.clear()
-    }
-
-    open fun initViews() { }
-    open fun subscribeData() { }
-    open fun subscribeView() { }
+    abstract fun initView()
 
     protected fun processError(message: String) {
         lifecycleScope.launch {

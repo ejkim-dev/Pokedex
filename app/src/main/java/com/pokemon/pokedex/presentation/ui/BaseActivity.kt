@@ -1,12 +1,10 @@
 package com.pokemon.pokedex.presentation.ui
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -17,7 +15,8 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.launch
 
 abstract class BaseActivity<VB : ViewBinding>(
-    private val bindingFactory: (LayoutInflater) -> VB
+    private val bindingFactory: (LayoutInflater) -> VB,
+    private val needApplyWindowInsets: Boolean = true
 ) : AppCompatActivity() {
 
     protected val binding: VB by lazy {
@@ -31,8 +30,10 @@ abstract class BaseActivity<VB : ViewBinding>(
         enableEdgeToEdge()
         setContentView(binding.root)
 
-        initViews()
-        subscribeView()
+        if (needApplyWindowInsets) {
+            setLayoutMargin()
+        }
+        initView()
     }
 
     override fun onDestroy() {
@@ -40,13 +41,19 @@ abstract class BaseActivity<VB : ViewBinding>(
         disposables.clear()
     }
 
-    open fun initViews() {
+    abstract fun initView()
 
+    protected fun processError(message: String) {
+        lifecycleScope.launch {
+            showToast(message)
+        }
     }
 
-    open fun subscribeView() {}
+    protected fun processError(throwable: Throwable) {
+        processError(throwable.message ?: "An error occurred")
+    }
 
-    open fun setLayoutMargin() {
+    private fun setLayoutMargin() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val currentInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
 
@@ -58,17 +65,5 @@ abstract class BaseActivity<VB : ViewBinding>(
             }
             insets
         }
-    }
-
-    protected fun getDrawableId(resId: Int): Drawable? = ContextCompat.getDrawable(this, resId)
-
-    protected fun processError(message: String) {
-        lifecycleScope.launch {
-            showToast(message)
-        }
-    }
-
-    protected fun processError(throwable: Throwable) {
-        processError(throwable.message ?: "An error occurred")
     }
 }
