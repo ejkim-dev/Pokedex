@@ -11,7 +11,6 @@ import com.pokemon.pokedex.presentation.KeyConstant
 import com.pokemon.pokedex.presentation.adapter.PokemonAdapter
 import com.pokemon.pokedex.presentation.item.BasePokemonItem
 import com.pokemon.pokedex.presentation.item.MyPokemonItem
-import com.pokemon.pokedex.presentation.showToast
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -26,9 +25,7 @@ class MyPokemonFragment :
         MyPokemonUseCase(pokemonRepository)
     }
 
-    override fun initViews() {
-        super.initViews()
-
+    override fun initView() {
         binding.recyclerViewPokemonList.adapter = PokemonAdapter { pokemon ->
             addPokemonHistoryUseCase(pokemon.id)
             showDetailActivity(pokemon)
@@ -38,6 +35,10 @@ class MyPokemonFragment :
     override fun onResume() {
         super.onResume()
 
+        getMyPokemon()
+    }
+
+    private fun getMyPokemon() {
         myPokemonUseCase()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -48,7 +49,7 @@ class MyPokemonFragment :
                     smoothScrollToPosition(0)
                 }
             }) {
-                showToast("myPokemonUseCase error : ${it.message}")
+                processError("myPokemonUseCase error : ${it.message}")
             }
             .addTo(disposables)
     }

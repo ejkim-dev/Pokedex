@@ -1,25 +1,22 @@
 package com.pokemon.pokedex.presentation.ui
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.pokemon.pokedex.presentation.showToast
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.subjects.PublishSubject
+import kotlinx.coroutines.launch
 
 abstract class BaseActivity<VB : ViewBinding>(
-    private val bindingFactory: (LayoutInflater) -> VB
+    private val bindingFactory: (LayoutInflater) -> VB,
+    private val needApplyWindowInsets: Boolean = true
 ) : AppCompatActivity() {
 
     protected val binding: VB by lazy {
@@ -28,17 +25,15 @@ abstract class BaseActivity<VB : ViewBinding>(
 
     protected val disposables = CompositeDisposable()
 
-    private val _error: PublishSubject<String> = PublishSubject.create()
-    val error : Observable<String>
-        get() = _error.hide()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(binding.root)
 
-        initViews()
-        subscribeView()
+        if (needApplyWindowInsets) {
+            setLayoutMargin()
+        }
+        initView()
     }
 
     override fun onDestroy() {
@@ -46,20 +41,19 @@ abstract class BaseActivity<VB : ViewBinding>(
         disposables.clear()
     }
 
-    open fun initViews() {
-        error
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe ({
-                showToast("error: $it")
-            }) {
-                processError(it)
-            }
-            .addTo(disposables)
+    abstract fun initView()
+
+    protected fun processError(message: String) {
+        lifecycleScope.launch {
+            showToast(message)
+        }
     }
 
-    open fun subscribeView() {}
+    protected fun processError(throwable: Throwable) {
+        processError(throwable.message ?: "An error occurred")
+    }
 
-    open fun setLayoutMargin() {
+    private fun setLayoutMargin() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val currentInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
 
@@ -71,15 +65,5 @@ abstract class BaseActivity<VB : ViewBinding>(
             }
             insets
         }
-    }
-
-    protected fun getDrawableId(resId: Int): Drawable? = ContextCompat.getDrawable(this, resId)
-
-    protected fun processError(throwable: Throwable) {
-        _error.onNext(throwable.message ?: "An error occurred")
-    }
-
-    protected fun processError(message: String) {
-        _error.onNext(message)
     }
 }

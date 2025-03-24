@@ -58,4 +58,6 @@ class PokemonAdapter(
             is MyPokemonItem -> holder.bindMyPokemon(currentItem)
         }
     }
+
+    override fun getItemCount(): Int = currentList.size
 }

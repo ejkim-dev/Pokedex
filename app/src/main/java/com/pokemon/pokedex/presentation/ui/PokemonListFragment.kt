@@ -9,9 +9,7 @@ import com.pokemon.pokedex.domain.usecase.AddPokemonHistoryUseCase
 import com.pokemon.pokedex.presentation.KeyConstant
 import com.pokemon.pokedex.presentation.adapter.PokemonAdapter
 import com.pokemon.pokedex.presentation.item.PokemonItem
-import com.pokemon.pokedex.presentation.showToast
 import com.jakewharton.rxbinding4.view.scrollChangeEvents
-import com.pokemon.pokedex.domain.entity.PokemonInfo
 import com.pokemon.pokedex.domain.usecase.PokemonInfoUseCase
 import com.pokemon.pokedex.domain.usecase.PokemonUseCase
 import com.pokemon.pokedex.domain.usecase.SavePokemonInfoUseCase
@@ -21,7 +19,6 @@ import com.pokemon.pokedex.presentation.show
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.schedulers.Schedulers
-import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 class PokemonListFragment :
     BaseFragment<FragmentPokemonListBinding>(FragmentPokemonListBinding::inflate) {
@@ -36,12 +33,11 @@ class PokemonListFragment :
     private val pokemonInfoUseCase: PokemonInfoUseCase by lazy {
         PokemonInfoUseCase(pokemonRepository)
     }
-    private val pokemonSubject = BehaviorSubject.create<List<PokemonInfo>>()
+
     private val loadingObserver: MutableLiveData<Boolean> = MutableLiveData(false)
 
-    override fun initViews() {
-        super.initViews()
-        getPokemon(offset = 0)
+    override fun initView() {
+        subscribeView()
 
         binding.recyclerViewPokemonList.adapter = PokemonAdapter { pokemon ->
             addPokemonHistoryUseCase(pokemon.id)
@@ -49,9 +45,16 @@ class PokemonListFragment :
         }
     }
 
-    override fun subscribeView() {
-        super.subscribeView()
+    override fun onResume() {
+        super.onResume()
 
+        val hasItem = (binding.recyclerViewPokemonList.adapter?.itemCount ?: 0) > 0
+        if (!hasItem) {
+            getPokemon(offset = 0)
+        }
+    }
+
+    private fun subscribeView() {
         with(binding) {
             recyclerViewPokemonList.scrollChangeEvents()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -68,43 +71,31 @@ class PokemonListFragment :
                     }
                 }
                 .addTo(disposables)
-        }
-    }
 
-    override fun subscribeData() {
-        super.subscribeData()
-
-        pokemonSubject
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ pokemonList ->
-                val pokemonItemList =
-                    pokemonList.map { PokemonItem(it.id, it.name, it.imageUrl) }
-
-                (binding.recyclerViewPokemonList.adapter as? PokemonAdapter)?.submitList(
-                    pokemonItemList
-                )
-            }) {
-                showToast("observePokemon error : ${it.message}")
+            loadingObserver.observe(viewLifecycleOwner) {
+                if (it) progress.show() else progress.hide()
             }
-            .addTo(disposables)
-
-        loadingObserver.observe(viewLifecycleOwner) {
-            if (it) binding.progress.show() else binding.progress.hide()
         }
     }
 
     private fun getPokemon(limit: Int = 10, offset: Int) {
         pokemonUseCase(limit, offset)
-            .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { loadingObserver.postValue(true) }
             .doOnTerminate { loadingObserver.postValue(false) }
             .map { savePokemonInfoUseCase(it) }
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 val currentPokemonInfo = pokemonInfoUseCase()
-                pokemonSubject.onNext(currentPokemonInfo)
+
+                val pokemonItemList =
+                    currentPokemonInfo.map { PokemonItem(it.id, it.name, it.imageUrl) }
+
+                (binding.recyclerViewPokemonList.adapter as? PokemonAdapter)?.submitList(
+                    pokemonItemList
+                )
             }, {
-                showToast("getPokemon error : ${it.message}")
+                processError("getPokemon error : ${it.message}")
             })
             .addTo(disposables)
     }

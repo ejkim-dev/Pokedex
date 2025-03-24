@@ -5,8 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
+import com.pokemon.pokedex.presentation.showToast
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import kotlinx.coroutines.launch
 
 abstract class BaseFragment<VB : ViewBinding>(
     private val bindingFactory: (LayoutInflater, ViewGroup?, Boolean) -> VB
@@ -28,22 +31,24 @@ abstract class BaseFragment<VB : ViewBinding>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initViews()
-        subscribeData()
-        subscribeView()
+        initView()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        disposables.clear()
         _binding = null
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        disposables.clear()
+    abstract fun initView()
+
+    protected fun processError(message: String) {
+        lifecycleScope.launch {
+            showToast(message)
+        }
     }
 
-    open fun initViews() { }
-    open fun subscribeData() { }
-    open fun subscribeView() { }
+    protected fun processError(throwable: Throwable) {
+        processError(throwable.message ?: "An error occurred")
+    }
 }
