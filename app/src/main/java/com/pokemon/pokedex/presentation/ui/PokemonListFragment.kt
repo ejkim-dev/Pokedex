@@ -38,11 +38,19 @@ class PokemonListFragment :
 
     override fun initView() {
         subscribeView()
-        getPokemon(offset = 0)
 
         binding.recyclerViewPokemonList.adapter = PokemonAdapter { pokemon ->
             addPokemonHistoryUseCase(pokemon.id)
             showDetailActivity(pokemon)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val hasItem = (binding.recyclerViewPokemonList.adapter?.itemCount ?: 0) > 0
+        if (!hasItem) {
+            getPokemon(offset = 0)
         }
     }
 
