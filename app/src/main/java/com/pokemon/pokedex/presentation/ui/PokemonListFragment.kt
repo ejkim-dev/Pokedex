@@ -10,9 +10,7 @@ import com.pokemon.pokedex.presentation.KeyConstant
 import com.pokemon.pokedex.presentation.adapter.PokemonAdapter
 import com.pokemon.pokedex.presentation.item.PokemonItem
 import com.jakewharton.rxbinding4.view.scrollChangeEvents
-import com.pokemon.pokedex.domain.usecase.PokemonInfoUseCase
 import com.pokemon.pokedex.domain.usecase.PokemonUseCase
-import com.pokemon.pokedex.domain.usecase.SavePokemonInfoUseCase
 import com.pokemon.pokedex.presentation.hide
 import com.pokemon.pokedex.presentation.item.BasePokemonItem
 import com.pokemon.pokedex.presentation.show
@@ -26,12 +24,6 @@ class PokemonListFragment :
     private val pokemonUseCase: PokemonUseCase by lazy { PokemonUseCase(pokemonRepository) }
     private val addPokemonHistoryUseCase: AddPokemonHistoryUseCase by lazy {
         AddPokemonHistoryUseCase(pokemonRepository)
-    }
-    private val savePokemonInfoUseCase: SavePokemonInfoUseCase by lazy {
-        SavePokemonInfoUseCase(pokemonRepository)
-    }
-    private val pokemonInfoUseCase: PokemonInfoUseCase by lazy {
-        PokemonInfoUseCase(pokemonRepository)
     }
 
     private val loadingObserver: MutableLiveData<Boolean> = MutableLiveData(false)
@@ -57,13 +49,12 @@ class PokemonListFragment :
     private fun subscribeView() {
         with(binding) {
             recyclerViewPokemonList.scrollChangeEvents()
-                .observeOn(AndroidSchedulers.mainThread())
                 .map {
                     val layoutManager = recyclerViewPokemonList.layoutManager as GridLayoutManager
                     val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
                     val totalItemCount = layoutManager.itemCount
 
-                    Pair(lastVisibleItemPosition  >= totalItemCount - 1, totalItemCount)
+                    Pair(lastVisibleItemPosition >= totalItemCount - 1, totalItemCount)
                 }
                 .subscribe { (islLastItemPosition, totalItemCount) ->
                     if (islLastItemPosition && !loadingObserver.value!!) {
@@ -83,17 +74,13 @@ class PokemonListFragment :
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { loadingObserver.postValue(true) }
             .doOnTerminate { loadingObserver.postValue(false) }
-            .map { savePokemonInfoUseCase(it) }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                val currentPokemonInfo = pokemonInfoUseCase()
-
+            .subscribe({ currentPokemonInfo ->
                 val pokemonItemList =
                     currentPokemonInfo.map { PokemonItem(it.id, it.name, it.imageUrl) }
-
-                (binding.recyclerViewPokemonList.adapter as? PokemonAdapter)?.submitList(
-                    pokemonItemList
-                )
+                val pokemonAdapter = binding.recyclerViewPokemonList.adapter as? PokemonAdapter
+                val currentItems = pokemonAdapter?.currentList ?: emptyList()
+                pokemonAdapter?.submitList(currentItems + pokemonItemList)
             }, {
                 processError("getPokemon error : ${it.message}")
             })
