@@ -16,11 +16,14 @@ class PokemonRepository {
     private val pokemonDataSource: PokemonDataSource
         get() = RetrofitManager.pokemonDataSource()
 
+    /**
+     * 포켓몬 API에서 추출한 포켓몬 정보를 반환
+     *
+     * @param limit 포켓몬 목록을 가져올 개수
+     * @param offset 포켓몬 목록을 가져올 시작 위치
+     * @return 추출된 포켓몬 목록
+     */
     fun getPokemonList(limit: Int, offset: Int): Single<List<PokemonInfo>> {
-        if (getPokemonInfoList().isNotEmpty() && offset == 0) {
-            return Single.just(getPokemonInfoList())
-        }
-
         return pokemonDataSource.getPokemonList(limit, offset)
             .map { it.results.map { extractIdFromUrl(it.url) } }
             .flatMap { pokemonIds ->
@@ -29,7 +32,9 @@ class PokemonRepository {
 
                 // List<Single<PokemonInfo>>를 zip으로 묶어 합침
                 Single.zip(singleList) { arrayOfAny ->
-                    arrayOfAny.map { it as PokemonInfo }
+                    val pokemonInfoList = arrayOfAny.map { it as PokemonInfo }
+                    savePokemonInfoList(pokemonInfoList) // 캐시에 저장
+                    pokemonInfoList
                 }
             }
     }
@@ -109,17 +114,16 @@ class PokemonRepository {
         return saveData(KeyConstants.MY_POKEMON, myPokemonHistoryList)
     }
 
-    fun savePokemonInfoList(pokemonInfo: List<PokemonInfo>) {
-        if (getPokemonInfoList().isEmpty()) {
+    private fun savePokemonInfoList(pokemonInfo: List<PokemonInfo>) {
+        val currentPokemonInfoList = getPokemonInfoList()
+        if (currentPokemonInfoList.isEmpty()) {
             saveData(KeyConstants.POKEMON_INFO, pokemonInfo)
         } else {
-            val currentPokemonInfoList = getPokemonInfoList().toMutableList()
-            currentPokemonInfoList.addAll(pokemonInfo)
-            saveData(KeyConstants.POKEMON_INFO, currentPokemonInfoList.toList())
+            saveData(KeyConstants.POKEMON_INFO, currentPokemonInfoList + pokemonInfo)
         }
     }
 
-    fun getPokemonInfoList(): List<PokemonInfo> {
+    private fun getPokemonInfoList(): List<PokemonInfo> {
         return loadData(KeyConstants.POKEMON_INFO, emptyList())
     }
 
